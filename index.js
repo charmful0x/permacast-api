@@ -1,12 +1,9 @@
 const Arweave = require("arweave")
 const express = require("express");
 const RSS = require("rss");
-const convertion = require("xml-js");
 const { STAKING_CONTRACT } = require("./contracts.js");
 const homepageHtml = require("./src/homepage.js");
 const { SmartWeaveNodeFactory, LoggerFactory } = require("redstone-smartweave");
-
-
 
 const arweave = Arweave.init({
       host: "arweave.net",
@@ -36,7 +33,7 @@ async function findPodcast({contractId, podcastId}) {
 
 function blockheightToDate(bh) {
       const EPOCH = 1528451997
-      const date = EPOCH + (bh / 720 * 24 * 3600)
+      const date = EPOCH + (bh / 720 * 24 * 3600) // To fix - (Mon, 19 Jan 1970 17:48:44 GMT seems wrong)
 
       return date
 }
@@ -53,7 +50,7 @@ function generateRss(podcast) {
 
       for (let episode of podcast.episodes) {
             feed.item({
-                  title: episode.name,
+                  title: episode.episodeName,
                   description: episode.description,
                   url: `https://arweave.net/${episode.audioTx}`,
                   guid: episode.eid,
@@ -79,17 +76,16 @@ async function getPromotedPodcasts({limit}) {
 };
 
 
+/* EXPRESS API REQS */
 
-
-
-
-
+// e.g. /rss/MPxtQl63-lAg6QcSY5Ftfv5D5NRW_VDHW4RAlc15eIY/Cv6J7sf5kr-Sh44Ho7usCUVeXfbaQlCpyRpIjVu59Qg
 app.get("/rss/:contractId/:podcastId", async(req, res) => {
+      res.setHeader('Content-Type', 'application/xml');
       const xml = await findPodcast(req.params)
-      let jsonOutput = convertion.xml2json(xml, {compact: false, spaces: 4});
-      res.send(jsonOutput)
+      res.send(xml)
 });
 
+// e.g. /staking/1
 app.get("/staking/:limit", async(req, res) => {
       res.send( await getPromotedPodcasts(req.params) )
 })

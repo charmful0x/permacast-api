@@ -40,21 +40,30 @@ function blockheightToDate(bh) {
 
 function generateRss(podcast) {
 
+      let img = `https://arweave.net/${podcast.cover}`;
+
       const feed = new RSS({
             title: podcast.podcastName,
             description: podcast.description,
             managingEditor: podcast.owner,
-            image_url: `https://arweave.net/${podcast.cover}`,
-            site_url: "https://permacast-v1.surge.sh"
+            image_url: img,
+            site_url: "https://permacast-v1.surge.sh",
+            language: "en", // TODO - make variable based on SWC
+            categories: ['Category'], // "" ^ TODO
+            custom_elements: [
+                  {'itunes:image': img},
+                  {'itunes:explicit': podcast.explicit}, // TODO - make variavle based on SWC state
+                  {'itunes:author': podcast.podcastName} // 'podcast "arweavers" is made by arweavers. acceptible?
+            ]
       });
 
       for (let episode of podcast.episodes) {
             feed.item({
                   title: episode.episodeName,
                   description: episode.description,
-                  url: `https://arweave.net/${episode.audioTx}`,
+                  enclosure: { url:`https://arweave.net/${episode.audioTx}`, length: episode.length, type: episode.type },
                   guid: episode.eid,
-                  date: blockheightToDate(episode.uploadedAt),
+                  date: episode.timestamp,
             })
       }
 
@@ -96,4 +105,4 @@ app.get("/", (req, res) => {
 
 app.listen(port, () => {
       console.log(`listening at http://localhost:${port}`)
-});
+});g

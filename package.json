@@ -1,0 +1,32 @@
+{
+  "name": "permacast-api",
+  "version": "1.0.0",
+  "description": "an api for permacast, the Arweave podcasting platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charmful0x/permacast-api.git"
+  },
+  "keywords": [
+    "arweave",
+    "podcast",
+    "web3",
+    "api"
+  ],
+  "author": "darwin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/charmful0x/permacast-api/issues"
+  },
+  "homepage": "https://github.com/charmful0x/permacast-api#readme",
+  "dependencies": {
+    "arweave": "^1.10.16",
+    "express": "^4.17.1",
+    "redstone-smartweave": "^0.3.10-alpha.9",
+    "rss": "^1.2.2",
+    "xml-js": "^1.6.11"
+  }
+}

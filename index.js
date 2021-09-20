@@ -41,23 +41,29 @@ function blockheightToDate(bh) {
 function generateRss(podcast) {
 
       let img = `https://arweave.net/${podcast.cover}`;
+      podcast.explicit = 'yes' // REMOVE
+
 
       const feed = new RSS({
+            custom_namespaces: { 'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd' },
             title: podcast.podcastName,
             description: podcast.description,
-            managingEditor: podcast.owner,
+            managingEditor: `${podcast.owner}@weve.email`,
             image_url: img,
-            site_url: "https://permacast-v1.surge.sh",
+            site_url: `https://permacast-v1.surge.sh/#/podcasts/${podcast.pid}`,
             language: "en", // TODO - make variable based on SWC
-            categories: ['Category'], // "" ^ TODO
             custom_elements: [
-                  {'itunes:image': img},
+                  {'itunes:image': { _attr: { href: img } } },
+                  {'itunes:email' : `${podcast.owner}@weve.email`},
                   {'itunes:explicit': podcast.explicit}, // TODO - make variavle based on SWC state
-                  {'itunes:author': podcast.podcastName} // 'podcast "arweavers" is made by arweavers. acceptible?
+                  {'itunes:author': podcast.podcastName}, // 'podcast "arweavers" is made by arweavers. acceptible?
+                  {'itunes:category': podcast.category}
             ]
       });
 
       for (let episode of podcast.episodes) {
+            episode.length = '1' // REMOVE
+            episode.type = 'audio/mpeg' // REMOVE
             feed.item({
                   title: episode.episodeName,
                   description: episode.description,
@@ -67,7 +73,7 @@ function generateRss(podcast) {
             })
       }
 
-      return feed.xml({indent: true})
+      return feed.xml({indent: true}) 
 }
 
 async function getPromotedPodcasts({limit}) {
@@ -105,4 +111,4 @@ app.get("/", (req, res) => {
 
 app.listen(port, () => {
       console.log(`listening at http://localhost:${port}`)
-});g
+});

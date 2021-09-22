@@ -1,12 +1,9 @@
 const Arweave = require("arweave")
 const express = require("express");
 const RSS = require("rss");
-const convertion = require("xml-js");
 const { STAKING_CONTRACT } = require("./contracts.js");
 const homepageHtml = require("./src/homepage.js");
 const { SmartWeaveNodeFactory, LoggerFactory } = require("redstone-smartweave");
-
-
 
 const arweave = Arweave.init({
       host: "arweave.net",
@@ -36,32 +33,45 @@ async function findPodcast({contractId, podcastId}) {
 
 function blockheightToDate(bh) {
       const EPOCH = 1528451997
-      const date = EPOCH + (bh / 720 * 24 * 3600)
+      const date = EPOCH + (bh / 720 * 24 * 3600) // To fix - (Mon, 19 Jan 1970 17:48:44 GMT seems wrong)
 
       return date
 }
 
 function generateRss(podcast) {
 
+      const IMG = `https://arweave.net/${podcast.cover}`;
+
+
       const feed = new RSS({
+            custom_namespaces: { 'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd' },
             title: podcast.podcastName,
             description: podcast.description,
-            managingEditor: podcast.owner,
-            image_url: `https://arweave.net/${podcast.cover}`,
-            site_url: "https://permacast-v1.surge.sh"
+            managingEditor: `${podcast.owner}@weve.email`,
+            image_url: IMG,
+            site_url: `https://permacast-v1.surge.sh/#/podcasts/${podcast.pid}`,
+            language: podcast.language,
+            custom_elements: [
+                  {'itunes:image': { _attr: { href: IMG } } },
+                  {'itunes:email' :podcast.email},
+                  {'itunes:explicit': podcast.explicit}, 
+                  {'itunes:author': podcast.author},
+                  {'itunes:category': podcast.categories}
+            ]
       });
 
       for (let episode of podcast.episodes) {
+
             feed.item({
-                  title: episode.name,
+                  title: episode.episodeName,
                   description: episode.description,
-                  url: `https://arweave.net/${episode.audioTx}`,
+                  enclosure: { url:`https://arweave.net/${episode.audioTx}`, length: episode.audioTxByteSize, type: episode.type },
                   guid: episode.eid,
-                  date: blockheightToDate(episode.uploadedAt),
+                  date: episode.uploadedAt, //block's timestamp
             })
       }
 
-      return feed.xml({indent: true})
+      return feed.xml({indent: true}) 
 }
 
 async function getPromotedPodcasts({limit}) {
@@ -79,17 +89,16 @@ async function getPromotedPodcasts({limit}) {
 };
 
 
+/* EXPRESS API REQS */
 
-
-
-
-
+// e.g. /rss/iEHZpnWKH4cNfen4rZEBYkgct2Cw4GEbPhbw1g2MS8I/HlRAyBBCaYeWAU8G1dPEY6eOsGVvrlrJVaFAHTr9h0M
 app.get("/rss/:contractId/:podcastId", async(req, res) => {
+      res.setHeader('Content-Type', 'application/xml');
       const xml = await findPodcast(req.params)
-      let jsonOutput = convertion.xml2json(xml, {compact: false, spaces: 4});
-      res.send(jsonOutput)
+      res.send(xml)
 });
 
+// e.g. /staking/1
 app.get("/staking/:limit", async(req, res) => {
       res.send( await getPromotedPodcasts(req.params) )
 })

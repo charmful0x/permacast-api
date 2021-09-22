@@ -47,14 +47,13 @@ function generateRss(podcast) {
             custom_namespaces: { 'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd' },
             title: podcast.podcastName,
             description: podcast.description,
-            managingEditor: podcast.owner,
+            managingEditor: podcast.email,
             categories: podcast.categories,
             image_url: IMG,
             site_url: `https://permacast-v1.surge.sh/#/podcasts/${podcast.pid}`,
             language: podcast.language,
             custom_elements: [
                   {'itunes:image': { _attr: { href: IMG } } },
-                  {'itunes:email' :podcast.email},
                   {'itunes:explicit': "no"}, 
                   {'itunes:author': podcast.author},
             ]

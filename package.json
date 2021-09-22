@@ -28,5 +28,8 @@
     "redstone-smartweave": "^0.3.10-alpha.9",
     "rss": "^1.2.2",
     "xml-js": "^1.6.11"
+  },
+  "engines": {
+    "node": "14.17.1"
   }
 }

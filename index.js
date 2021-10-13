@@ -56,6 +56,10 @@ function generateRss(podcast) {
                   {'itunes:image': { _attr: { href: IMG } } },
                   {'itunes:explicit': "no"}, 
                   {'itunes:author': podcast.author},
+                  {'itunes:owner': [
+                        {'itunes:email': podcast.email},
+                        {'itunes:name': podcast.podcastName}
+                  ]}
             ]
       });
 
